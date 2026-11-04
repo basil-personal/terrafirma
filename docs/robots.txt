@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://basil-personal.github.io/terrafirma/sitemap.xml
