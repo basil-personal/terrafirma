@@ -2,6 +2,9 @@ from pathlib import Path
 from html import escape
 import json
 import os
+import re
+import posixpath
+from urllib.parse import urlsplit, urlunsplit
 
 ROOT = Path(__file__).parent
 DIST = ROOT / 'docs'
@@ -82,10 +85,15 @@ for path,title,desc,body in pages:
 (DIST/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+ORIGIN+'/sitemap.xml\n')
 print(f'Built {len(pages)} pages.')
 
-# GitHub project Pages live below the repository path. Set SITE_BASE_PATH=''
-# and SITE_ORIGIN='https://getterrafirma.com' after connecting the custom domain.
+# Relative page and asset URLs work on both project Pages and a custom domain.
 for page in DIST.rglob('index.html'):
-    html = page.read_text()
-    html = html.replace('href="/', 'href="' + BASE_PATH + '/').replace('src="/', 'src="' + BASE_PATH + '/').replace('srcset="/', 'srcset="' + BASE_PATH + '/')
+    start = page.parent.relative_to(DIST).as_posix()
+    def relative_url(match):
+        parsed = urlsplit(match.group(2))
+        target = posixpath.relpath(parsed.path.lstrip('/') or '.', start)
+        if parsed.path.endswith('/'):
+            target += '/'
+        return match.group(1) + '="' + urlunsplit(('', '', target, parsed.query, parsed.fragment)) + '"'
+    html = re.sub(r'(href|src|srcset)="(/[^"]*)"', relative_url, page.read_text())
     page.write_text(html)
 (DIST / '.nojekyll').touch()

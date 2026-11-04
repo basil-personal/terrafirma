@@ -16,15 +16,29 @@ python3 build_site.py
 
 Commit the updated source and `docs/`. GitHub Pages publishes the update automatically.
 
-## Custom domain
+## Custom domain: getterrafirma.com
 
-The default build targets the GitHub project path `/terrafirma/`. Once getterrafirma.com is configured in GitHub Pages and DNS, rebuild with:
+Pages currently publishes at https://basil-personal.github.io/terrafirma/. Relative links support both this project URL and the custom domain.
+
+In Namecheap, open Domain List → getterrafirma.com → Manage → Advanced DNS. Configure these Host Records with Automatic TTL:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| CNAME | www | basil-personal.github.io |
+
+Replace conflicting parking/redirect/address records for `@` and `www`. Preserve email-related MX/TXT records. These instructions apply when Namecheap manages the domain's DNS.
+
+Once DNS is ready, set the custom domain to `getterrafirma.com` in Repository Settings → Pages. After GitHub issues the certificate, enable Enforce HTTPS. Rebuild canonical metadata for the custom domain with:
 
 ```sh
-SITE_ORIGIN=https://getterrafirma.com SITE_BASE_PATH='' python3 build_site.py
+SITE_ORIGIN=https://getterrafirma.com python3 build_site.py
 ```
 
-Then add `docs/CNAME` containing `getterrafirma.com`. Do not configure the CNAME before the domain is ready.
+GitHub adds `docs/CNAME` when the custom domain is saved. Keep that file in future commits.
 
 ## Contact and fonts
 
