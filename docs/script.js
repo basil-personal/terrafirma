@@ -127,7 +127,7 @@
           status.after(copyButton);
         };
         const onAck = event => {
-          if (event.source !== frame.contentWindow) return;
+          let ackSrc = event.source; let ackInside = ackSrc === frame.contentWindow; while (!ackInside && ackSrc && ackSrc !== window) { let next; try { next = ackSrc.parent; } catch (err) { break; } if (next === frame.contentWindow) { ackInside = true; break; } if (next === ackSrc) break; ackSrc = next; } if (!ackInside) return;
           if (event.origin !== 'https://script.google.com' && !/^https:\/\/([a-z0-9]+-)+script\.googleusercontent\.com$/.test(event.origin) && event.origin !== 'https://script.googleusercontent.com') return;
           const d = event.data;
           if (!d || d.app !== 'terrafirma-inquiry' || d.nonce !== nonce) return;
