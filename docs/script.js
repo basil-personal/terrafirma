@@ -83,11 +83,14 @@
   if (form) {
     const config = window.TERRAFIRMA_CONFIG || {};
     const destination = typeof config.contactEmail === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.contactEmail) ? config.contactEmail : '';
+    const endpoint = (() => { try { const u = new URL(config.formEndpoint); return u.protocol === 'https:' && (u.hostname === 'script.google.com' || u.hostname === 'script.googleusercontent.com') ? u.href : ''; } catch { return ''; } })();
     const audienceNames = { owner: 'Mineral owner', operator: 'Operator or buyer', county: 'Courthouse partner', other: 'Other' };
     const audience = new URLSearchParams(location.search).get('audience');
     if (audienceNames[audience]) form.elements.audience.value = audience;
     let brief = '';
-    if (destination) { document.querySelector('#contact-notice').textContent = 'Prepare a short introduction. The next step opens an email draft for you to review and send.'; document.querySelector('#copy-inquiry').textContent = 'Open email draft'; }
+    let payload = null;
+    if (endpoint) { document.querySelector('#contact-notice').textContent = 'Send the brief and it goes straight to our team. We reply by email.'; document.querySelector('#copy-inquiry').textContent = 'Send inquiry'; }
+    else if (destination) { document.querySelector('#contact-notice').textContent = 'Prepare a short introduction. The next step opens an email draft for you to review and send.'; document.querySelector('#copy-inquiry').textContent = 'Open email draft'; }
     form.addEventListener('submit', e => {
       e.preventDefault(); if (!form.reportValidity() || form.elements.website.value) return;
       const d = new FormData(form);
@@ -96,16 +99,57 @@
       values.forEach(([key, value]) => { const row = document.createElement('div'); const dt = document.createElement('dt'); const dd = document.createElement('dd'); dt.textContent = key; dd.textContent = value; row.append(dt, dd); dl.append(row); });
       const message = String(d.get('message')).trim(); document.querySelector('#review-message').textContent = message;
       brief = 'TERRAFIRMA — INQUIRY\n\n' + values.map(([k, v]) => k + ': ' + v).join('\n') + '\n\n' + message;
-      document.querySelector('#review-notice').textContent = destination ? 'Your introduction is ready. Open an email draft to review and send it.' : 'Your inquiry is ready to copy. Nothing has been sent.';
+      payload = { name: values[0][1], email: values[1][1], interest: values[2][1], region: values[3][1], message: message, website: form.elements.website.value };
+      document.querySelector('#review-notice').textContent = endpoint ? 'Your inquiry is ready to send.' : destination ? 'Your introduction is ready. Open an email draft to review and send it.' : 'Your inquiry is ready to copy. Nothing has been sent.';
       form.hidden = true; document.querySelector('#inquiry-review').hidden = false;
       const heading = document.querySelector('#inquiry-review h2'); heading.tabIndex = -1; heading.focus({ preventScroll: true });
       track('inquiry_review');
     });
     document.querySelector('#edit-inquiry').addEventListener('click', () => { document.querySelector('#inquiry-review').hidden = true; form.hidden = false; form.elements.name.focus({ preventScroll: true }); document.querySelector('#inquiry-status').textContent = ''; });
     document.querySelector('#copy-inquiry').addEventListener('click', async () => {
-      if (destination) { location.href = 'mailto:' + encodeURIComponent(destination) + '?subject=' + encodeURIComponent('Terrafirma inquiry') + '&body=' + encodeURIComponent(brief); document.querySelector('#inquiry-status').textContent = 'Your email app should open a draft. Send it there when you are ready.'; return; }
-      try { await navigator.clipboard.writeText(brief); document.querySelector('#inquiry-status').textContent = 'Copied. Your information has not been sent.'; track('inquiry_copied'); }
-      catch { const field = document.createElement('textarea'); field.value = brief; field.setAttribute('aria-label', 'Inquiry text to copy'); document.querySelector('#inquiry-status').replaceChildren(field); field.focus(); field.select(); }
+      const status = document.querySelector('#inquiry-status');
+      const sendButton = document.querySelector('#copy-inquiry');
+      if (endpoint) {
+        sendButton.disabled = true; status.textContent = 'Sending...';
+        const nonce = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(36)).join('').replace(/[^a-z0-9]/gi, '').slice(0, 24);
+        const done = (state, text) => {
+          window.removeEventListener('message', onAck); clearTimeout(timer); frame.remove(); postForm.remove();
+          if (state === 'ok') { status.textContent = 'Sent. We will reply to the email you provided.'; sendButton.hidden = true; document.querySelector('#edit-inquiry').hidden = true; track('inquiry_sent'); }
+          else { sendButton.disabled = false; status.textContent = text; offerCopy(); }
+        };
+        const offerCopy = () => {
+          const copyButton = document.createElement('button');
+          copyButton.className = 'text-link'; copyButton.type = 'button'; copyButton.textContent = 'Copy inquiry';
+          copyButton.addEventListener('click', async () => {
+            try { await navigator.clipboard.writeText(brief); copyButton.textContent = 'Copied to clipboard.'; }
+            catch { copyButton.textContent = 'Copy failed; please select the text above and copy it yourself.'; }
+          });
+          status.after(copyButton);
+        };
+        const onAck = event => {
+          if (event.source !== frame.contentWindow) return;
+          if (event.origin !== 'https://script.google.com' && !/^https:\/\/([a-z0-9]+-)+script\.googleusercontent\.com$/.test(event.origin) && event.origin !== 'https://script.googleusercontent.com') return;
+          const d = event.data;
+          if (!d || d.app !== 'terrafirma-inquiry' || d.nonce !== nonce) return;
+          if (d.status === 'ok') done('ok');
+          else if (d.status === 'quota') done('quota', 'Delivery is temporarily unavailable. Please try again tomorrow; nothing was sent.');
+          else done('unknown', 'We could not confirm delivery. Your inquiry may still have reached us; please wait before trying again.');
+        };
+        window.addEventListener('message', onAck);
+        const frame = document.createElement('iframe');
+        frame.name = 'inquiry-transport'; frame.hidden = true; frame.setAttribute('aria-hidden', 'true'); frame.tabIndex = -1;
+        const postForm = document.createElement('form');
+        postForm.method = 'POST'; postForm.action = endpoint; postForm.target = 'inquiry-transport'; postForm.hidden = true;
+        const field = document.createElement('input');
+        field.type = 'hidden'; field.name = 'payload'; field.value = JSON.stringify({ ...payload, nonce });
+        postForm.append(field); document.body.append(frame, postForm);
+        const timer = setTimeout(() => done('unknown', 'We could not confirm delivery. Your inquiry may still have reached us; please wait before trying again.'), 20000);
+        postForm.submit();
+        return;
+      }
+      if (destination) { location.href = 'mailto:' + encodeURIComponent(destination) + '?subject=' + encodeURIComponent('Terrafirma inquiry') + '&body=' + encodeURIComponent(brief); status.textContent = 'Your email app should open a draft. Send it there when you are ready.'; return; }
+      try { await navigator.clipboard.writeText(brief); status.textContent = 'Copied. Your information has not been sent.'; track('inquiry_copied'); }
+      catch { const field = document.createElement('textarea'); field.value = brief; field.setAttribute('aria-label', 'Inquiry text to copy'); status.replaceChildren(field); field.focus(); field.select(); }
     });
   }
 })();
