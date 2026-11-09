@@ -198,3 +198,42 @@ h3, .audience-row h3 { letter-spacing: -.035em; }
   .hero-picture img { object-position: 39% center; }
   .manager-field .diligence-stack { padding-inline: 0; }
 }
+
+.inside-open { padding: clamp(48px,6vw,90px) clamp(18px,2vw,38px) 0; }
+.chapter-head { margin-bottom: clamp(22px,3vw,44px); }
+.chapter-head .eyebrow::before { content: ""; display: inline-block; width: 4px; height: 4px; background: var(--rust); margin: 0 12px 2px 0; }
+.chapter-head > div { display: grid; grid-template-columns: minmax(0,1.9fr) minmax(200px,.85fr) auto; gap: 4%; align-items: end; margin-top: 34px; }
+.chapter-head h1 { font: 400 clamp(40px,4.65vw,78px)/1.035 var(--sans); letter-spacing: -.047em; }
+.chapter-head p { font-size: clamp(13px,1.08vw,16px); line-height: 1.38; max-width: 35ch; }
+.chapter-head a { display: grid; place-items: center; height: 40px; width: 40px; border-radius: 2px; background: var(--rust); color: white; }
+.field-plate { margin: 0; height: clamp(340px,48vw,710px); position: relative; overflow: hidden; background: var(--paper-dark); }
+.field-plate img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.field-plate figcaption { position: absolute; left: 16px; bottom: 16px; padding: 6px 9px; color: white; background: #211914cb; font-size: 11px; }
+.plate-series { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
+.plate-series .field-plate { height: clamp(230px,30vw,460px); }
+.chapter > h2 { margin: 24px 0 40px; }
+.chapter-grid { display: grid; grid-template-columns: minmax(0,.88fr) minmax(0,1.12fr); gap: 7%; align-items: start; }
+.chapter-example { position: sticky; top: 88px; }
+.chapter-example .button { margin-top: 16px; }
+.chapter-rows .service-detail { grid-template-columns: 32px minmax(0,1fr); gap: 12px 20px; padding: 27px 0; }
+.chapter-rows .service-detail > div { grid-column: 2; }
+.chapter-rows h3 { font-size: clamp(24px,2.4vw,38px); }
+.intake-photo { height: clamp(110px,14vw,220px); margin-top: 28px; background: url("assets/ward-county-1000.webp") center 58% / cover; }
+.contact .contact-card { background: #f6f4ef; border: 1px solid var(--line); }
+.contact h1,.credits h1 { font-size: clamp(40px,4.8vw,76px); letter-spacing: -.045em; }
+.credit-index { display: flex; gap: 12px 22px; flex-wrap: wrap; padding-block: 16px; border-block: 1px solid var(--line); font-size: 14px; }
+.credit-index a:hover { text-decoration: underline; }
+.credit-sheet { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; margin-bottom: 20px; }
+.credit-sheet img { width: 100%; height: clamp(80px,12vw,170px); object-fit: cover; }
+@media (max-width: 760px) {
+ .chapter-head > div { grid-template-columns: 1fr auto; gap: 18px; }
+ .chapter-head h1 { grid-column: 1/-1; }
+ .field-plate { height: clamp(260px,75vw,450px); }
+ .chapter-grid { display: block; }
+ .chapter-example { position: static; margin-bottom: 28px; }
+ .chapter-example .detail-graphic { margin-top: 0; }
+ .plate-series { grid-template-columns: 1fr; }
+ .plate-series .field-plate { height: 160px; }
+ .intake-photo { height: 100px; }
+ .credit-sheet { grid-template-columns: 1fr 1fr; }
+}
