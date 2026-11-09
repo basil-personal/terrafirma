@@ -171,3 +171,30 @@ h3, .audience-row h3 { letter-spacing: -.035em; }
 }
 @keyframes land-parallax { from { translate: 0 -5%; } to { translate: 0 5%; } }
 @media (max-height: 650px), (max-width: 620px) { .site-footer { position: relative; } }
+
+
+/* Field photography and line drawings for the services they describe. */
+.hero-picture img { object-position: 40% 43%; filter: saturate(.74) sepia(.19) contrast(1.08); }
+.hero-shade { background: linear-gradient(180deg, #21171165, transparent 34%, #1b140f45 55%, #1c100ce8); }
+.source-photo img { object-position: 47% center; filter: saturate(.5) sepia(.28) contrast(1.06); }
+.service-icon { width: 38px; height: 38px; flex: none; color: var(--rust); }
+.audience-row > .service-icon { align-self: center; }
+.principle-grid .service-icon { width: 48px; height: 48px; }
+.manager-field {
+  background: linear-gradient(155deg, #241910a3, #1f15125e 45%, #241714e6),
+    url("assets/ward-county-1000.webp") center / cover;
+  color: white;
+}
+.manager-field .diligence-stack { transform: none; padding-inline: 5%; }
+.manager-field .diligence-stack > div { border: 0; background: #fcf8ee; color: #28221e; }
+.manager-field .diligence-stack > div:nth-child(2) { border-left: 3px solid var(--rust); }
+.manager-field .graphic-caption { border-color: #ffffff70; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .audience-row .service-icon { transition: transform .3s var(--ease); }
+  .audience-row:hover .service-icon { transform: translateY(-3px); }
+}
+@media (max-width: 620px) {
+  .audience-row > .service-icon { width: 25px; height: 25px; }
+  .hero-picture img { object-position: 39% center; }
+  .manager-field .diligence-stack { padding-inline: 0; }
+}
