@@ -17,3 +17,49 @@
 @media(max-width:1100px){.wordmark{width:136px}.hero-scene-tools{gap:12px}}
 @media(max-width:620px){.wordmark{width:128px}.brand>.survey-mark{width:38px;height:38px}.hero-scene-tools{gap:0}.hero-topline>.eyebrow{font-size:9px;letter-spacing:1px}.motion-toggle{font-size:9px;padding:5px 7px;min-height:32px}}
 @media(prefers-reduced-motion:reduce){.motion-toggle{display:none}.hero-picture img{will-change:auto}}
+
+/* Survey typography, terrain grid and record transitions. */
+.eyebrow, .row-number, .doc-meta, .sample-label, .hero-scroll, .walk-tabs button {
+  font-family: ui-monospace, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.hero-grid {
+  opacity: .32;
+  background-image: radial-gradient(circle, #fff2dba6 .8px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(105deg, transparent 20%, black 90%);
+}
+.hero-topline { border-top: 1px solid #fff3dc70; padding-top: 13px; }
+.section-heading .eyebrow { display: flex; align-items: center; gap: 12px; }
+.section-heading .eyebrow::before {
+  content: ""; width: 25px; height: 1px; flex: none; background: currentColor;
+}
+.walk-tabs button[aria-selected="true"] { box-shadow: inset 0 -2px currentColor; }
+@media (min-width: 900px) {
+  .hero h1 { font-size: clamp(76px, 8.5vw, 140px); line-height: .98; letter-spacing: -.038em; }
+  .hero h1 > span:last-child { font-style: italic; }
+  .hero-description { border-left: 1px solid #fff3dc70; padding-left: 25px; }
+}
+@keyframes survey-title {
+  from { clip-path: inset(0 0 100%); transform: translateY(16px); }
+  to { clip-path: inset(-10% -2%); transform: translateY(0); }
+}
+@keyframes survey-enter {
+  from { opacity: .3; translate: 0 18px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1 > span { animation: survey-title .85s var(--ease) backwards; }
+  .hero h1 > span:nth-child(2) { animation-delay: .14s; }
+  .hero-description { animation: survey-enter .72s .22s var(--ease) backwards; }
+  .document-stage:not([hidden]), .interest-stage:not([hidden]), .review-stage:not([hidden]) {
+    animation: survey-enter .42s var(--ease);
+  }
+  @supports (animation-timeline: view()) {
+    .section-heading, .audience-row, .source-photo {
+      animation: survey-enter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 85%;
+    }
+  }
+}
