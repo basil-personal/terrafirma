@@ -84,7 +84,7 @@
     const config = window.TERRAFIRMA_CONFIG || {};
     const destination = typeof config.contactEmail === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.contactEmail) ? config.contactEmail : '';
     const endpoint = (() => { try { const u = new URL(config.formEndpoint); return u.protocol === 'https:' && (u.hostname === 'script.google.com' || u.hostname === 'script.googleusercontent.com') ? u.href : ''; } catch { return ''; } })();
-    const audienceNames = { owner: 'Mineral owner', operator: 'Operator or buyer', county: 'Courthouse partner', other: 'Other' };
+    const audienceNames = { owner: 'Mineral owner', manager: 'Mineral rights manager', operator: 'Operator or buyer', county: 'Courthouse partner', other: 'Other' };
     const audience = new URLSearchParams(location.search).get('audience');
     if (audienceNames[audience]) form.elements.audience.value = audience;
     let brief = '';
@@ -201,3 +201,4 @@
   pointer.addEventListener('change', sync);
   sync();
 })();
+
