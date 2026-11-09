@@ -18,7 +18,7 @@ def button(text,href,secondary=False):
     return f'<a class="button {"button-secondary" if secondary else ""}" href="{href}"><span>{text}</span>{ARROW}</a>'
 
 def nav(active=''):
-    items=[('Mineral Owners','/owners/'),('Operators & Buyers','/operators/'),('Mineral Rights Managers','/managers/'),('Our Approach','/approach/')]
+    items=[('Mineral Rights Managers','/managers/'),('Mineral Owners','/owners/'),('Operators & Buyers','/operators/'),('Our Approach','/approach/')]
     links=''.join(f'<a href="{url}" {"aria-current=page" if active==url else ""}>{name}</a>' for name,url in items)
     return f'''<a class="skip-link" href="#main">Skip to content</a><header class="site-header"><a class="brand" href="/" aria-label="Terrafirma home">{MARK}<span class="wordmark">{WORDMARK}</span></a><nav class="desktop-nav" aria-label="Main navigation">{links}</nav>{button('Start a conversation','/contact/')}<button class="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span></button><div class="scroll-progress" aria-hidden="true"></div></header><nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation" hidden>{links}<a href="/courthouse-partners/">Courthouse Partnerships</a><a href="/contact/">Start a conversation {ARROW}</a></nav>'''
 
