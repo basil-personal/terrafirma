@@ -153,3 +153,51 @@
     });
   }
 })();
+
+/* The real link text remains available to assistive technology. */
+(() => {
+  const labels = document.querySelectorAll('.desktop-nav a, a.button > span, .footer-top nav a');
+  for (const label of labels) {
+    if (label.childElementCount || !label.textContent.trim()) continue;
+    const original = document.createElement('span');
+    original.className = 'roll-original';
+    original.textContent = label.textContent;
+    const copy = original.cloneNode(true);
+    copy.className = 'roll-copy';
+    copy.setAttribute('aria-hidden', 'true');
+    const mask = document.createElement('span');
+    mask.className = 'roll-window';
+    mask.append(original, copy);
+    label.replaceChildren(mask);
+  }
+
+  const nav = document.querySelector('.desktop-nav');
+  if (!nav) return;
+  const position = document.createElement('span');
+  position.className = 'pointer-position';
+  position.setAttribute('aria-hidden', 'true');
+  const x = document.createElement('span');
+  const y = document.createElement('span');
+  x.textContent = 'X.–––';
+  y.textContent = 'Y.–––';
+  position.append(x, y);
+  nav.after(position);
+  const pointer = matchMedia('(min-width: 1150px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+  let frame = 0, px = 0, py = 0;
+  function paint() {
+    x.textContent = 'X.' + px;
+    y.textContent = 'Y.' + py;
+    frame = 0;
+  }
+  function move(event) {
+    px = Math.round(event.clientX);
+    py = Math.round(event.clientY);
+    if (!frame) frame = requestAnimationFrame(paint);
+  }
+  function sync() {
+    if (pointer.matches) window.addEventListener('pointermove', move, { passive: true });
+    else window.removeEventListener('pointermove', move);
+  }
+  pointer.addEventListener('change', sync);
+  sync();
+})();
